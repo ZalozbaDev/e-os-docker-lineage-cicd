@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-repo_log="$LOGS_DIR/repo-$(date +%Y%m%d).log"
-
 # cd to working directory
 cd "$SRC_DIR"
 
@@ -48,8 +46,8 @@ if [ "$LOCAL_MIRROR" = true ]; then
   cd "$MIRROR_DIR"
 
   if [ ! -d .repo ]; then
-    echo ">> [$(date)] Initializing mirror repository" | tee -a "$repo_log"
-    yes | repo init -u "$MIRROR" --mirror --no-clone-bundle -p linux &>> "$repo_log"
+    echo ">> [$(date)] Initializing mirror repository"
+    yes | repo init -u "$MIRROR" --mirror --no-clone-bundle -p linux
   fi
 
   # Copy local manifests to the appropriate folder in order take them into consideration
@@ -62,8 +60,8 @@ if [ "$LOCAL_MIRROR" = true ]; then
     wget -q -O .repo/local_manifests/proprietary.xml "https://raw.githubusercontent.com/TheMuppets/manifests/mirror/default.xml"
   fi
 
-  echo ">> [$(date)] Syncing mirror repository" | tee -a "$repo_log"
-  repo sync --force-sync --no-clone-bundle &>> "$repo_log"
+  echo ">> [$(date)] Syncing mirror repository"
+  repo sync --force-sync --no-clone-bundle
 
   if [ $? != 0 ]; then
     sync_successful=false
@@ -94,11 +92,11 @@ for branch in ${BRANCH_NAME//,/ }; do
       fi
     done
 
-    echo ">> [$(date)] (Re)initializing branch repository" | tee -a "$repo_log"
+    echo ">> [$(date)] (Re)initializing branch repository"
     if [ "$LOCAL_MIRROR" = true ]; then
-      yes | repo init -u "$REPO" --reference "$MIRROR_DIR" -b "$branch" &>> "$repo_log"
+      yes | repo init -u "$REPO" --reference "$MIRROR_DIR" -b "$branch"
     else
-      yes | repo init -u "$REPO" -b "$branch" &>> "$repo_log"
+      yes | repo init -u "$REPO" -b "$branch"
     fi
 
     # Copy local manifests to the appropriate folder in order take them into consideration
@@ -124,9 +122,9 @@ for branch in ${BRANCH_NAME//,/ }; do
       wget -q -O .repo/local_manifests/proprietary.xml "https://raw.githubusercontent.com/TheMuppets/manifests/$themuppets_branch/muppets.xml"
     fi
 
-    echo ">> [$(date)] Syncing branch repository" | tee -a "$repo_log"
+    echo ">> [$(date)] Syncing branch repository"
     builddate=$(date +%Y%m%d)
-    repo sync -c --force-sync &>> "$repo_log"
+    repo sync -c --force-sync
 
     if [ $? != 0 ]; then
       sync_successful=false
@@ -264,9 +262,9 @@ for branch in ${BRANCH_NAME//,/ }; do
           builddate=$currentdate
 
           if [ "$LOCAL_MIRROR" = true ]; then
-            echo ">> [$(date)] Syncing mirror repository" | tee -a "$repo_log"
+            echo ">> [$(date)] Syncing mirror repository"
             cd "$MIRROR_DIR"
-            repo sync --force-sync --no-clone-bundle &>> "$repo_log"
+            repo sync --force-sync --no-clone-bundle
 
             if [ $? != 0 ]; then
               sync_successful=false
@@ -274,9 +272,9 @@ for branch in ${BRANCH_NAME//,/ }; do
             fi
           fi
 
-          echo ">> [$(date)] Syncing branch repository" | tee -a "$repo_log"
+          echo ">> [$(date)] Syncing branch repository"
           cd "$SRC_DIR/$branch_dir"
-          repo sync -c --force-sync &>> "$repo_log"
+          repo sync -c --force-sync
 
           if [ $? != 0 ]; then
             sync_successful=false
@@ -306,11 +304,9 @@ for branch in ${BRANCH_NAME//,/ }; do
           logsubdir=
         fi
 
-        DEBUG_LOG="$LOGS_DIR/$logsubdir/eelo-$los_ver-$builddate-$RELEASE_TYPE-$codename.log"
-
         if [ -f /root/userscripts/pre-build.sh ]; then
-          echo ">> [$(date)] Running pre-build.sh for $codename" >> "$DEBUG_LOG"
-          /root/userscripts/pre-build.sh $codename &>> "$DEBUG_LOG"
+          echo ">> [$(date)] Running pre-build.sh for $codename"
+          /root/userscripts/pre-build.sh $codename
 
           if [ $? != 0 ]; then
             build_device=false
@@ -318,52 +314,52 @@ for branch in ${BRANCH_NAME//,/ }; do
         fi
 
         if [ "$build_device" = false ]; then
-          echo ">> [$(date)] No build for $codename" >> "$DEBUG_LOG"
+          echo ">> [$(date)] No build for $codename"
           continue
         fi
 
         # Start the build
-        echo ">> [$(date)] Starting build for $codename, $branch branch" | tee -a "$DEBUG_LOG"
+        echo ">> [$(date)] Starting build for $codename, $branch branch"
         build_successful=false
         echo "ANDROID_JACK_VM_ARGS=${ANDROID_JACK_VM_ARGS}"
-        if brunch $codename &>> "$DEBUG_LOG"; then
+        if brunch $codename ; then
           currentdate=$(date +%Y%m%d)
           if [ "$builddate" != "$currentdate" ]; then
-            find out/target/product/$codename -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \; &>> "$DEBUG_LOG"
+            find out/target/product/$codename -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \;
           fi
 
           if [ "$BUILD_DELTA" = true ]; then
             if [ -d "delta_last/$codename/" ]; then
               # If not the first build, create delta files
-              echo ">> [$(date)] Generating delta files for $codename" | tee -a "$DEBUG_LOG"
+              echo ">> [$(date)] Generating delta files for $codename"
               cd /root/delta
-              if ./opendelta.sh $codename &>> "$DEBUG_LOG"; then
-                echo ">> [$(date)] Delta generation for $codename completed" | tee -a "$DEBUG_LOG"
+              if ./opendelta.sh $codename; then
+                echo ">> [$(date)] Delta generation for $codename completed"
               else
-                echo ">> [$(date)] Delta generation for $codename failed" | tee -a "$DEBUG_LOG"
+                echo ">> [$(date)] Delta generation for $codename failed"
               fi
               if [ "$DELETE_OLD_DELTAS" -gt "0" ]; then
-                /usr/bin/python /root/clean_up.py -n $DELETE_OLD_DELTAS -V $los_ver -N 1 "$DELTA_DIR/$codename" &>> $DEBUG_LOG
+                /usr/bin/python /root/clean_up.py -n $DELETE_OLD_DELTAS -V $los_ver -N 1 "$DELTA_DIR/$codename"
               fi
               cd "$source_dir"
             else
               # If the first build, copy the current full zip in $source_dir/delta_last/$codename/
-              echo ">> [$(date)] No previous build for $codename; using current build as base for the next delta" | tee -a "$DEBUG_LOG"
-              mkdir -p delta_last/$codename/ &>> "$DEBUG_LOG"
-              find out/target/product/$codename -maxdepth 1 -name 'e-*.zip' -type f -exec cp {} "$source_dir/delta_last/$codename/" \; &>> "$DEBUG_LOG"
+              echo ">> [$(date)] No previous build for $codename; using current build as base for the next delta"
+              mkdir -p delta_last/$codename/
+              find out/target/product/$codename -maxdepth 1 -name 'e-*.zip' -type f -exec cp {} "$source_dir/delta_last/$codename/" \;
             fi
           fi
           # Move produced ZIP files to the main OUT directory
-          echo ">> [$(date)] Moving build artifacts for $codename to '$ZIP_DIR/$zipsubdir'" | tee -a "$DEBUG_LOG"
+          echo ">> [$(date)] Moving build artifacts for $codename to '$ZIP_DIR/$zipsubdir'"
           cd out/target/product/$codename
           for build in e-*.zip; do
             sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
           done
-          find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \; &>> "$DEBUG_LOG"
+          find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
           cd "$source_dir"
           build_successful=true
         else
-          echo ">> [$(date)] Failed build for $codename" | tee -a "$DEBUG_LOG"
+          echo ">> [$(date)] Failed build for $codename"
         fi
 
         # Remove old zips and logs
@@ -382,10 +378,10 @@ for branch in ${BRANCH_NAME//,/ }; do
           fi
         fi
         if [ -f /root/userscripts/post-build.sh ]; then
-          echo ">> [$(date)] Running post-build.sh for $codename" >> "$DEBUG_LOG"
-          /root/userscripts/post-build.sh $codename $build_successful &>> "$DEBUG_LOG"
+          echo ">> [$(date)] Running post-build.sh for $codename"
+          /root/userscripts/post-build.sh $codename $build_successful
         fi
-        echo ">> [$(date)] Finishing build for $codename" | tee -a "$DEBUG_LOG"
+        echo ">> [$(date)] Finishing build for $codename"
 
         if [ "$BUILD_OVERLAY" = true ]; then
           # The Jack server must be stopped manually, as we want to unmount $TMP_DIR/merged
@@ -403,13 +399,13 @@ for branch in ${BRANCH_NAME//,/ }; do
         fi
 
         if [ "$CLEAN_AFTER_BUILD" = true ]; then
-          echo ">> [$(date)] Cleaning source dir for device $codename" | tee -a "$DEBUG_LOG"
+          echo ">> [$(date)] Cleaning source dir for device $codename"
           if [ "$BUILD_OVERLAY" = true ]; then
             cd "$TMP_DIR"
             rm -rf ./*
           else
             cd "$source_dir"
-            mka clean &>> "$DEBUG_LOG"
+            mka clean
           fi
         fi
 
