@@ -356,7 +356,7 @@ for branch in ${BRANCH_NAME//,/ }; do
             sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
           done
           find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
-          find . -maxdepth 1 -name '*.img*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
+          find . -name '*.img*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
           cd "$source_dir"
           build_successful=true
         else
