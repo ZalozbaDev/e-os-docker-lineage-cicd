@@ -322,7 +322,8 @@ for branch in ${BRANCH_NAME//,/ }; do
         echo ">> [$(date)] Starting build for $codename, $branch branch"
         build_successful=false
         echo "ANDROID_JACK_VM_ARGS=${ANDROID_JACK_VM_ARGS}"
-        if brunch $codename ; then
+        breakfast $codename
+        if make systemimage ; then
           currentdate=$(date +%Y%m%d)
           if [ "$builddate" != "$currentdate" ]; then
             find out/target/product/$codename -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \;
@@ -355,7 +356,7 @@ for branch in ${BRANCH_NAME//,/ }; do
           for build in e-*.zip; do
             sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
           done
-          find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
+          find . -name '*.img*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
           cd "$source_dir"
           build_successful=true
         else

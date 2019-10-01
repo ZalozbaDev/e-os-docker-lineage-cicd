@@ -9,7 +9,7 @@ build_image:
   stage: build
   image: docker:git
   services:
-    - docker:dind
+    - docker:18-dind
   script:
     - docker pull $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.e.foundation:5000
