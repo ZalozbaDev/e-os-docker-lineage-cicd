@@ -352,7 +352,7 @@ for branch in ${BRANCH_NAME//,/ }; do
           fi
           # Move produced ZIP files to the main OUT directory
           echo ">> [$(date)] Moving build artifacts for $codename to '$ZIP_DIR/$zipsubdir'"
-          cd out/target/product/$codename
+          cd out/target/product/
           for build in e-*.zip; do
             sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
           done
