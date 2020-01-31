@@ -5,14 +5,30 @@ variables:
   DOCKER_DRIVER: overlay2
   CONTAINER_IMAGE: registry.gitlab.e.foundation:5000/$CI_PROJECT_PATH
 
-build_image:
+.build_image:
   stage: build
   image: docker:git
   services:
-    - docker:dind
+    - docker:18-dind
   script:
-    - docker pull $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.e.foundation:5000
-    - docker build --cache-from $CONTAINER_IMAGE:latest -t $CONTAINER_IMAGE -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME .
-    - docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    - if [ "${CI_COMMIT_REF_NAME}" = master ] ; then docker push $CONTAINER_IMAGE:latest ; fi
+    - "docker pull $CONTAINER_IMAGE:$IMAGE_TAG || true"
+    - "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.e.foundation:5000"
+    - "docker build --cache-from $CONTAINER_IMAGE:$IMAGE_TAG -t $CONTAINER_IMAGE -t $CONTAINER_IMAGE:$IMAGE_TAG -t $CONTAINER_IMAGE:$IMAGE_TAG_RELEASE ."
+    - "docker push $CONTAINER_IMAGE:$IMAGE_TAG"
+    - 'if [ "${CI_COMMIT_REF_NAME}" = master ] ; then docker push $CONTAINER_IMAGE:$IMAGE_TAG_RELEASE ; fi'
+
+build_prod:
+  extends: .build_image
+  after_script:
+    - 'if [ "${CI_COMMIT_REF_NAME}" = master ] ; then docker push $CONTAINER_IMAGE:latest ; fi'
+  variables:
+    IMAGE_TAG: $CI_COMMIT_REF_NAME
+    IMAGE_TAG_RELEASE: prod
+
+build_debug:
+  extends: .build_image
+  before_script:
+    - "mv build.dev.sh src/build.sh"
+  variables:
+    IMAGE_TAG: $CI_COMMIT_REF_NAME-debug
+    IMAGE_TAG_RELEASE: debug

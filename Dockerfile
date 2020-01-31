@@ -177,7 +177,6 @@ RUN echo 'deb http://deb.debian.org/debian experimental main' >> /etc/apt/source
 RUN apt-get -qq update
 RUN apt-get -qqy upgrade
 
-RUN apt-get install -y openjdk-7-jdk
 RUN apt-get install -y bc bison bsdmainutils build-essential ccache cgpt cron \
       curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick kmod \
       lib32ncurses5-dev lib32readline-dev lib32z1-dev libesd0-dev liblz4-tool \
