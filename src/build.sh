@@ -197,7 +197,8 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     echo "ANDROID_JACK_VM_ARGS=${ANDROID_JACK_VM_ARGS}"
     echo "Switch to Python2"
     ln -fs /usr/bin/python2 /usr/bin/python
-    if brunch ${DEVICE}; then
+    breakfast $codename
+    if mka recoveryimage; then
       currentdate=$(date +%Y%m%d)
       if [ "$builddate" != "$currentdate" ]; then
         find out/target/product/${DEVICE} -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \;
@@ -229,7 +230,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       cd out/target/product/${DEVICE}
       for build in e-*.zip; do
         sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
-        find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
+        find . -name 'recovery.img' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
 
         if [ "$BACKUP_IMG" = true ]; then
           find . -maxdepth 1 -name '*.img' -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
