@@ -233,6 +233,9 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
         if [ "$BACKUP_IMG" = true ]; then
           find . -maxdepth 1 -name '*.img' -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+          if [ ! -f "system.img" ]; then
+            zip "$ZIP_DIR/$zipsubdir/IMG-$build" obj/PACKAGING/systemimage_intermediates/system.img
+          fi
           cd $ZIP_DIR/$zipsubdir
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
           md5sum "IMG-$build" > "IMG-$build.md5sum"
