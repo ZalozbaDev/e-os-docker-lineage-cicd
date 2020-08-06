@@ -126,6 +126,9 @@ for branch in ${BRANCH_NAME//,/ }; do
       elif [[ $branch =~ pie$ ]]; then
         themuppets_branch=lineage-16.0
         echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
+      elif [[ $branch =~ q$ ]]; then
+        themuppets_branch=lineage-17.1
+        echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
       else
         themuppets_branch=cm-14.1
         echo ">> [$(date)] Can't find a matching branch on github.com/TheMuppets, using $themuppets_branch"
