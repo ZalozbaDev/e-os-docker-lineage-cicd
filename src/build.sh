@@ -81,6 +81,9 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     elif [[ ${BRANCH_NAME} =~ pie$ ]]; then
       themuppets_branch=lineage-16.0
       echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
+    elif [[ ${BRANCH_NAME} =~ q$ ]]; then
+      themuppets_branch=lineage-17.1
+      echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
     else
       themuppets_branch=cm-14.1
       echo ">> [$(date)] Can't find a matching branch on github.com/TheMuppets, using $themuppets_branch"
@@ -96,14 +99,17 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     sync_successful=false
   fi
 
-  android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.OPM1 := //p' build/core/version_defaults.mk)
+  android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.QP1A := //p' build/core/version_defaults.mk)
   if [ -z $android_version ]; then
-    android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.PPR1 := //p' build/core/version_defaults.mk)
+    android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.OPM1 := //p' build/core/version_defaults.mk)
     if [ -z $android_version ]; then
-      android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION := //p' build/core/version_defaults.mk)
+      android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.PPR1 := //p' build/core/version_defaults.mk)
       if [ -z $android_version ]; then
-        echo ">> [$(date)] Can't detect the android version"
-        exit 1
+        android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION := //p' build/core/version_defaults.mk)
+        if [ -z $android_version ]; then
+          echo ">> [$(date)] Can't detect the android version"
+          exit 1
+        fi
       fi
     fi
   fi
