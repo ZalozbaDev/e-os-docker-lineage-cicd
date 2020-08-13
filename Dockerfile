@@ -100,6 +100,9 @@ ENV DELETE_OLD_LOGS 0
 # Requires ZIP_SUBDIR.
 ENV OPENDELTA_BUILDS_JSON ''
 
+# Save recovery image
+ENV RECOVERY_IMG false
+
 # You can optionally specify a USERSCRIPTS_DIR volume containing these scripts:
 #  * begin.sh, run at the very beginning
 #  * before.sh, run after the syncing and patching, before starting the builds
