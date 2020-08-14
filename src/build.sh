@@ -246,9 +246,9 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 	
 	if [ "$RECOVERY_IMG" = true ]; then
 	  if [ -f "recovery.img" ]; then
-	    cp -a recovery.img "$ZIP_DIR/$zipsubdir/recovery-${build%.*}img"
+	    cp -a recovery.img "$ZIP_DIR/$zipsubdir/recovery-${build%.*}.img"
 	  else
-	    cp -a boot.img "$ZIP_DIR/$zipsubdir/recovery-${build%.*}img"
+	    cp -a boot.img "$ZIP_DIR/$zipsubdir/recovery-${build%.*}.img"
 	  fi
 	fi
       done
