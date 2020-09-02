@@ -37,6 +37,32 @@ branch_dir=$(sed 's/.*-\([a-zA-Z]*\)$/\1/' <<< ${BRANCH_NAME})
 branch_dir=${branch_dir^^}
 
 if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
+  vendor=lineage
+  case "$BRANCH_NAME" in
+    *nougat*)
+      vendor="cm"
+      themuppets_branch="cm-14.1"
+      android_version="7.1.2"
+      ;;
+    *oreo*)
+      themuppets_branch="lineage-15.1"
+      android_version="8.1"
+      ;;
+    *pie*)
+      themuppets_branch="lineage-16.0"
+      android_version="9"
+      ;;
+    *q*)
+      themuppets_branch="lineage-17.1"
+      android_version="10"
+      ;;
+    *)
+      echo ">> [$(date)] Building branch $branch is not (yet) suppported"
+      exit 1
+      ;;
+    esac
+
+  android_version_major=$(cut -d '.' -f 1 <<< $android_version)
 
   mkdir -p "$SRC_DIR/$branch_dir"
   cd "$SRC_DIR/$branch_dir"
@@ -72,23 +98,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
   rm -f .repo/local_manifests/proprietary.xml
   if [ "$INCLUDE_PROPRIETARY" = true ]; then
-    if [[ ${BRANCH_NAME} =~ nougat$ ]]; then
-      themuppets_branch=cm-14.1
-      echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
-    elif [[ ${BRANCH_NAME} =~ oreo$ ]]; then
-      themuppets_branch=lineage-15.1
-      echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
-    elif [[ ${BRANCH_NAME} =~ pie$ ]]; then
-      themuppets_branch=lineage-16.0
-      echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
-    elif [[ ${BRANCH_NAME} =~ q$ ]]; then
-      themuppets_branch=lineage-17.1
-      echo ">> [$(date)] Use branch $themuppets_branch on github.com/TheMuppets"
-    else
-      themuppets_branch=cm-14.1
-      echo ">> [$(date)] Can't find a matching branch on github.com/TheMuppets, using $themuppets_branch"
-    fi
     wget -q -O .repo/local_manifests/proprietary.xml "https://raw.githubusercontent.com/TheMuppets/manifests/$themuppets_branch/muppets.xml"
+    /root/build_manifest.py --remote "https://gitlab.com" --remotename "gitlab_https" \
+  "https://gitlab.com/the-muppets/manifest/raw/$themuppets_branch/muppets.xml" .repo/local_manifests/proprietary_gitlab.xml
+
   fi
 
   echo ">> [$(date)] Syncing branch repository"
@@ -97,28 +110,6 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
   if [ $? != 0 ]; then
     sync_successful=false
-  fi
-
-  android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.QP1A := //p' build/core/version_defaults.mk)
-  if [ -z $android_version ]; then
-    android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.OPM1 := //p' build/core/version_defaults.mk)
-    if [ -z $android_version ]; then
-      android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION\.PPR1 := //p' build/core/version_defaults.mk)
-      if [ -z $android_version ]; then
-        android_version=$(sed -n -e 's/^\s*PLATFORM_VERSION := //p' build/core/version_defaults.mk)
-        if [ -z $android_version ]; then
-          echo ">> [$(date)] Can't detect the android version"
-          exit 1
-        fi
-      fi
-    fi
-  fi
-  android_version_major=$(cut -d '.' -f 1 <<< $android_version)
-
-  if [ "$android_version_major" -ge "8" ]; then
-    vendor="lineage"
-  else
-    vendor="cm"
   fi
 
   if [ ! -d "vendor/$vendor" ]; then
@@ -134,11 +125,14 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     echo ">> [$(date)] Adding keys path ($KEYS_DIR)"
     # Soong (Android 9+) complains if the signing keys are outside the build path
     ln -sf "$KEYS_DIR" user-keys
-    sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OTA_PUBLIC_KEYS := user-keys/releasekey\nPRODUCT_EXTRA_RECOVERY_KEYS := user-keys/releasekey\n\n;" "vendor/$vendor/config/common.mk"
-  fi
+    if [ "$android_version_major" -lt "10" ]; then
+      sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OTA_PUBLIC_KEYS := user-keys/releasekey\nPRODUCT_EXTRA_RECOVERY_KEYS := user-keys/releasekey\n\n;" "vendor/$vendor/config/common.mk"
+    fi
 
-  echo ">> [$(date)] Using OpenJDK $jdk_version"
-  update-java-alternatives -s java-1.$jdk_version.0-openjdk-amd64 &> /dev/null
+    if [ "$android_version_major" -ge "10" ]; then
+      sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OTA_PUBLIC_KEYS := user-keys/releasekey\n\n;" "vendor/$vendor/config/common.mk"
+    fi
+  fi
 
   # Prepare the environment
   echo ">> [$(date)] Preparing build environment"
@@ -209,27 +203,6 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         find out/target/product/${DEVICE} -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \;
       fi
 
-      if [ "$BUILD_DELTA" = true ]; then
-        if [ -d "delta_last/${DEVICE}/" ]; then
-          # If not the first build, create delta files
-          echo ">> [$(date)] Generating delta files for ${DEVICE}"
-          cd /root/delta
-          if ./opendelta.sh ${DEVICE}; then
-            echo ">> [$(date)] Delta generation for ${DEVICE} completed"
-          else
-            echo ">> [$(date)] Delta generation for ${DEVICE} failed"
-          fi
-          if [ "$DELETE_OLD_DELTAS" -gt "0" ]; then
-            /usr/bin/python /root/clean_up.py -n $DELETE_OLD_DELTAS -V $los_ver -N 1 "$DELTA_DIR/${DEVICE}"
-          fi
-          cd "$source_dir"
-        else
-          # If the first build, copy the current full zip in $source_dir/delta_last/${DEVICE}/
-          echo ">> [$(date)] No previous build for ${DEVICE}; using current build as base for the next delta"
-          mkdir -p delta_last/${DEVICE}/
-          find out/target/product/${DEVICE} -maxdepth 1 -name 'e-*.zip' -type f -exec cp {} "$source_dir/delta_last/${DEVICE}/" \;
-        fi
-      fi
       # Move produced ZIP files to the main OUT directory
       echo ">> [$(date)] Moving build artifacts for ${DEVICE} to '$ZIP_DIR/$zipsubdir'"
       cd out/target/product/${DEVICE}
@@ -291,15 +264,6 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   echo "Switch back to Python3"
   ln -fs /usr/bin/python3 /usr/bin/python
 
-fi
-
-# Create the OpenDelta's builds JSON file
-if ! [ -z "$OPENDELTA_BUILDS_JSON" ]; then
-  echo ">> [$(date)] Creating OpenDelta's builds JSON file (ZIP_DIR/$OPENDELTA_BUILDS_JSON)"
-  if [ "$ZIP_SUBDIR" != true ]; then
-    echo ">> [$(date)] WARNING: OpenDelta requires zip builds separated per device! You should set ZIP_SUBDIR to true"
-  fi
-  /usr/bin/python /root/opendelta_builds_json.py "$ZIP_DIR" -o "$ZIP_DIR/$OPENDELTA_BUILDS_JSON"
 fi
 
 if [ "$DELETE_OLD_LOGS" -gt "0" ]; then

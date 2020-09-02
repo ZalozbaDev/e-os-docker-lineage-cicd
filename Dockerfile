@@ -1,4 +1,4 @@
-FROM debian:buster
+FROM ubuntu:20.04
 MAINTAINER Romain Hunault <romain.hunault@e.email>
 
 # Environment variables
@@ -8,7 +8,6 @@ ENV SRC_DIR /srv/src
 ENV CCACHE_DIR /srv/ccache
 ENV ZIP_DIR /srv/zips
 ENV LMANIFEST_DIR /srv/local_manifests
-ENV DELTA_DIR /srv/delta
 ENV KEYS_DIR /srv/keys
 ENV LOGS_DIR /srv/logs
 ENV USERSCRIPTS_DIR /srv/userscripts
@@ -28,9 +27,12 @@ ENV USE_CCACHE 1
 # for no limit.
 ENV CCACHE_SIZE 50G
 
+# We need to specify the ccache binary since it is no longer packaged along with AOSP
+ENV CCACHE_EXEC /usr/bin/ccache
+
 # Environment for the /e/ branches name
 # See https://github.com/LineageOS/android_vendor_cm/branches for possible options
-ENV BRANCH_NAME 'v1-pie'
+ENV BRANCH_NAME 'v1-q'
 
 # Environment for the device
 # eg. DEVICE=hammerhead
@@ -46,7 +48,7 @@ ENV REPO 'https://gitlab.e.foundation/e/os/android.git'
 ENV USER_NAME '/e/ robot'
 ENV USER_MAIL 'erobot@e.email'
 
-# Include proprietary files, downloaded automatically from github.com/TheMuppets/
+# Include proprietary files, downloaded automatically from github.com/TheMuppets/ and gitlab.com/the-muppets/
 # Only some branches are supported
 ENV INCLUDE_PROPRIETARY true
 
@@ -82,23 +84,11 @@ ENV LOGS_SUBDIR true
 # Backup the .img in addition to zips
 ENV BACKUP_IMG false
 
-# Generate delta files
-ENV BUILD_DELTA false
-
 # Delete old zips in $ZIP_DIR, keep only the N latest one (0 to disable)
 ENV DELETE_OLD_ZIPS 0
 
-# Delete old deltas in $DELTA_DIR, keep only the N latest one (0 to disable)
-ENV DELETE_OLD_DELTAS 0
-
 # Delete old logs in $LOGS_DIR, keep only the N latest one (0 to disable)
 ENV DELETE_OLD_LOGS 0
-
-# Create a JSON file that indexes the build zips at the end of the build process
-# (for the updates in OpenDelta). The file will be created in $ZIP_DIR with the
-# specified name; leave empty to skip it.
-# Requires ZIP_SUBDIR.
-ENV OPENDELTA_BUILDS_JSON ''
 
 # Save recovery image
 ENV RECOVERY_IMG false
@@ -121,7 +111,6 @@ VOLUME $SRC_DIR
 VOLUME $CCACHE_DIR
 VOLUME $ZIP_DIR
 VOLUME $LMANIFEST_DIR
-VOLUME $DELTA_DIR
 VOLUME $KEYS_DIR
 VOLUME $LOGS_DIR
 VOLUME $USERSCRIPTS_DIR
@@ -137,24 +126,19 @@ RUN mkdir -p $SRC_DIR
 RUN mkdir -p $CCACHE_DIR
 RUN mkdir -p $ZIP_DIR
 RUN mkdir -p $LMANIFEST_DIR
-RUN mkdir -p $DELTA_DIR
 RUN mkdir -p $KEYS_DIR
 RUN mkdir -p $LOGS_DIR
 RUN mkdir -p $USERSCRIPTS_DIR
 
 # Install build dependencies
 ############################
-COPY apt_preferences /etc/apt/preferences
-
-RUN echo 'deb http://deb.debian.org/debian sid main' >> /etc/apt/sources.list
-RUN echo 'deb http://deb.debian.org/debian experimental main' >> /etc/apt/sources.list
 RUN apt-get -qq update
 RUN apt-get -qqy upgrade
 
-RUN apt-get install -y bc bison bsdmainutils build-essential ccache cgpt cron \
+RUN apt-get install -y bc bison bsdmainutils build-essential ccache cgpt clang cron \
       curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick kmod \
       lib32ncurses5-dev libncurses5 lib32readline-dev lib32z1-dev libtinfo5 liblz4-tool \
-      libncurses5-dev libsdl1.2-dev libssl-dev libwxgtk3.0-dev libxml2 \
+      libncurses5-dev libsdl1.2-dev libssl-dev libxml2 \
       libxml2-utils lsof lzop maven pngcrush \
       procps python python3 rsync schedtool squashfs-tools software-properties-common wget xdelta3 xsltproc yasm \
       zip zlib1g-dev
@@ -168,24 +152,6 @@ RUN curl -q https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-
 RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
 RUN apt-get -qq update && apt-get install -y adoptopenjdk-8-hotspot
 RUN update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
-
-# Download and build delta tools
-################################
-RUN cd /root/ && \
-        mkdir delta && \
-        git clone --depth=1 https://gitlab.e.foundation/e/os/android_packages_apps_OpenDelta.git OpenDelta && \
-        gcc -o delta/zipadjust OpenDelta/jni/zipadjust.c OpenDelta/jni/zipadjust_run.c -lz && \
-        cp OpenDelta/server/minsignapk.jar OpenDelta/server/opendelta.sh delta/ && \
-        chmod +x delta/opendelta.sh && \
-        rm -rf OpenDelta/ && \
-        sed -i -e 's|^\s*HOME=.*|HOME=/root|; \
-                   s|^\s*BIN_XDELTA=.*|BIN_XDELTA=xdelta3|; \
-                   s|^\s*FILE_MATCH=.*|FILE_MATCH=lineage-\*.zip|; \
-                   s|^\s*PATH_CURRENT=.*|PATH_CURRENT=$SRC_DIR/out/target/product/$DEVICE|; \
-                   s|^\s*PATH_LAST=.*|PATH_LAST=$SRC_DIR/delta_last/$DEVICE|; \
-                   s|^\s*KEY_X509=.*|KEY_X509=$KEYS_DIR/releasekey.x509.pem|; \
-                   s|^\s*KEY_PK8=.*|KEY_PK8=$KEYS_DIR/releasekey.pk8|; \
-                   s|publish|$DELTA_DIR|g' /root/delta/opendelta.sh
 
 # Set the work directory
 ########################
