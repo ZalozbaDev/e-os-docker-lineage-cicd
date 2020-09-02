@@ -42,7 +42,7 @@ TL;DR - go to the [Examples](#examples)
 
 The two fundamental settings are:
 
- * `BRANCH_NAME (cm-14.1)`: LineageOS branch, see the branch list
+ * `BRANCH_NAME (lineage-16.0)`: LineageOS branch, see the branch list
     [here][los-branches] (multiple comma-separated branches can be specified)
  * `DEVICE_LIST`: comma-separated list of devices to build
  * `REPO (https://github.com/LineageOS/android.git)`: LineageOS repo use for build
@@ -91,7 +91,8 @@ three ways:
 
  * by [pulling them from a running LineageOS][blobs-pull]
  * by [extracting them from a LineageOS ZIP][blobs-extract]
- * by downloading them from [TheMuppets repos][blobs-themuppets] (unofficial)
+ * by downloading them from TheMuppets [GitHub][blobs-themuppets] and
+   [GitLab][blobs-the-muppets] repositories (unofficial)
 
 The third way is the easiest one and is enabled by default; if you're OK with
 that just move on, otherwise set `INCLUDE_PROPRIETARY (true)` to `false` and
@@ -164,12 +165,12 @@ When `LOCAL_MIRROR` is `true`:
 
 ## Examples
 
-### Build for thea (cm-14.1, officially supported), test keys, no patches
+### Build for bacon (lineage-16.0, officially supported), test keys, no patches
 
 ```
 docker run \
-    -e "BRANCH_NAME=cm-14.1" \
-    -e "DEVICE_LIST=thea" \
+    -e "BRANCH_NAME=lineage-16.0" \
+    -e "DEVICE_LIST=bacon" \
     -v "/home/user/lineage:/srv/src" \
     -v "/home/user/zips:/srv/zips" \
     -v "/home/user/logs:/srv/logs" \
@@ -177,12 +178,12 @@ docker run \
     lineageos4microg/docker-lineage-cicd
 ```
 
-### Build for dumpling (lineage-15.1, officially supported), custom keys, restricted signature spoofing with integrated microG and FDroid
+### Build for angler (lineage-15.1, officially supported), custom keys, restricted signature spoofing with integrated microG and FDroid
 
 ```
 docker run \
     -e "BRANCH_NAME=lineage-15.1" \
-    -e "DEVICE_LIST=dumpling" \
+    -e "DEVICE_LIST=angler" \
     -e "SIGN_BUILDS=true" \
     -e "SIGNATURE_SPOOFING=restricted" \
     -e "CUSTOM_PACKAGES=GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend com.google.android.maps.jar FDroid FDroidPrivilegedExtension " \
@@ -212,13 +213,13 @@ it ends with `.xml`) in the `/home/user/manifests` folder with this content:
 </manifest>
 ```
 
-### Build for four devices on cm-14.1 and lineage-15.1 (officially supported), custom keys, restricted signature spoofing with integrated microG and FDroid, custom OTA server
+### Build for four devices on lineage-15.1 and lineage-16.0 (officially supported), custom keys, restricted signature spoofing with integrated microG and FDroid, custom OTA server
 
 ```
 docker run \
-    -e "BRANCH_NAME=cm-14.1,lineage-15.1" \
-    -e "DEVICE_LIST_CM_14_1=onyx,thea" \
-    -e "DEVICE_LIST_LINEAGE_15_1=cheeseburger,dumpling" \
+    -e "BRANCH_NAME=lineage-15.1,lineage-16.0" \
+    -e "DEVICE_LIST_LINEAGE_15_1=angler,oneplus2" \
+    -e "DEVICE_LIST_LINEAGE_16_0=bacon,dumpling" \
     -e "SIGN_BUILDS=true" \
     -e "SIGNATURE_SPOOFING=restricted" \
     -e "CUSTOM_PACKAGES=GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend com.google.android.maps.jar FDroid FDroidPrivilegedExtension " \
@@ -309,6 +310,7 @@ docker run \
 [blobs-pull]: https://wiki.lineageos.org/devices/bacon/build#extract-proprietary-blobs
 [blobs-extract]: https://wiki.lineageos.org/extracting_blobs_from_zips.html
 [blobs-themuppets]: https://github.com/TheMuppets/manifests
+[blobs-the-muppets]: https://gitlab.com/the-muppets/manifest
 [lineageota]: https://github.com/julianxhokaxhiu/LineageOTA
 [los-extras]: https://download.lineageos.org/extras
 [dockerfile]: Dockerfile
