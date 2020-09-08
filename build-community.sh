@@ -95,7 +95,7 @@ for branch in ${BRANCH_NAME//,/ }; do
         themuppets_branch="lineage-16.0"
         android_version="9"
         ;;
-      q*)
+      *q*)
         themuppets_branch="lineage-17.1"
         android_version="10"
         ;;
