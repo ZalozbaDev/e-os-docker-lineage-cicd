@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # cd to working directory
-cd "$SRC_DIR"
+cd "$SRC_DIR" || return 1
 
 if [ -f /root/userscripts/begin.sh ]; then
   echo ">> [$(date)] Running begin.sh"
@@ -28,12 +28,12 @@ fi
 # If requested, clean the OUT dir in order to avoid clutter
 if [ "$CLEAN_OUTDIR" = true ]; then
   echo ">> [$(date)] Cleaning '$ZIP_DIR'"
-  rm -rf "$ZIP_DIR/"*
+  rm -rf "${ZIP_DIR:?}/*"
 fi
 
 sync_successful=true
 
-branch_dir=$(sed 's/.*-\([a-zA-Z]*\)$/\1/' <<< ${BRANCH_NAME})
+branch_dir=$(sed 's/.*-\([a-zA-Z]*\)$/\1/' <<< "${BRANCH_NAME}")
 branch_dir=${branch_dir^^}
 
 if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
@@ -65,7 +65,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   android_version_major=$(cut -d '.' -f 1 <<< $android_version)
 
   mkdir -p "$SRC_DIR/$branch_dir"
-  cd "$SRC_DIR/$branch_dir"
+  cd "$SRC_DIR/$branch_dir" || return 1
 
   echo ">> [$(date)] Branch:  ${BRANCH_NAME}"
   echo ">> [$(date)] Device: ${DEVICE}"
@@ -73,18 +73,17 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   # Remove previous changes of vendor/cm, vendor/lineage and frameworks/base (if they exist)
   for path in "vendor/cm" "vendor/lineage" "frameworks/base"; do
     if [ -d "$path" ]; then
-      cd "$path"
+      cd "$path" || return 1
       git reset -q --hard
       git clean -q -fd
-      cd "$SRC_DIR/$branch_dir"
+      cd "$SRC_DIR/$branch_dir" || return 1
     fi
   done
 
   echo ">> [$(date)] (Re)initializing branch repository"
 
   TAG_PREFIX=""
-  curl https://gitlab.e.foundation/api/v4/projects/659/repository/tags | grep "\"name\":\"${BRANCH_NAME}\""
-  if [ $? == 0 ]
+  if curl https://gitlab.e.foundation/api/v4/projects/659/repository/tags | grep "\"name\":\"${BRANCH_NAME}\""
   then
     echo "Branch name ${BRANCH_NAME} is a tag on e/os/releases, prefix with refs/tags/ for 'repo init'"
     TAG_PREFIX="refs/tags/"
@@ -106,9 +105,9 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
   echo ">> [$(date)] Syncing branch repository"
   builddate=$(date +%Y%m%d)
-  repo sync -c --force-sync
 
-  if [ $? != 0 ]; then
+  if ! repo sync -c --force-sync
+  then
     sync_successful=false
   fi
 
@@ -144,7 +143,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   fi
 
   build_device=true
-  if ! [ -z "${DEVICE}" ]; then
+  if [ -n "${DEVICE}" ]; then
 
     currentdate=$(date +%Y%m%d)
     if [ "$builddate" != "$currentdate" ]; then
@@ -152,17 +151,17 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       builddate=$currentdate
 
       echo ">> [$(date)] Syncing branch repository"
-      cd "$SRC_DIR/$branch_dir"
-      repo sync -c --force-sync
+      cd "$SRC_DIR/$branch_dir" || return 1
 
-      if [ $? != 0 ]; then
+
+      if ! repo sync -c --force-sync; then
         sync_successful=false
         build_device=false
       fi
     fi
 
     source_dir="$SRC_DIR/$branch_dir"
-    cd "$source_dir"
+    cd "$source_dir" || return 1
 
     if [ "$ZIP_SUBDIR" = true ]; then
       zipsubdir=${DEVICE}
@@ -179,16 +178,15 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
     if [ -f /root/userscripts/pre-build.sh ]; then
       echo ">> [$(date)] Running pre-build.sh for ${DEVICE}"
-      /root/userscripts/pre-build.sh ${DEVICE}
 
-      if [ $? != 0 ]; then
+
+      if ! /root/userscripts/pre-build.sh "${DEVICE}"; then
         build_device=false
       fi
     fi
 
     if [ "$build_device" = false ]; then
       echo ">> [$(date)] No build for ${DEVICE}"
-      continue
     fi
 
     # Start the build
@@ -197,22 +195,22 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     echo "ANDROID_JACK_VM_ARGS=${ANDROID_JACK_VM_ARGS}"
     echo "Switch to Python2"
     ln -fs /usr/bin/python2 /usr/bin/python
-    if brunch ${DEVICE}; then
+    if brunch "${DEVICE}"; then
       currentdate=$(date +%Y%m%d)
       if [ "$builddate" != "$currentdate" ]; then
-        find out/target/product/${DEVICE} -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \;
+        find "out/target/product/${DEVICE}" -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} "$currentdate" "$builddate" \;
       fi
 
       # Move produced ZIP files to the main OUT directory
       echo ">> [$(date)] Moving build artifacts for ${DEVICE} to '$ZIP_DIR/$zipsubdir'"
-      cd out/target/product/${DEVICE}
+      cd "out/target/product/${DEVICE}" || return 1
       for build in e-*.zip; do
         sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
         find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
 
         if [ "$BACKUP_IMG" = true ]; then
           find . -maxdepth 1 -name '*.img' -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
-          cd $ZIP_DIR/$zipsubdir
+          cd "$ZIP_DIR/$zipsubdir" || return 1
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
           md5sum "IMG-$build" > "IMG-$build.md5sum"
         fi
@@ -226,7 +224,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 	fi
       done
 
-      cd "$source_dir"
+      cd "$source_dir" || return 1
       build_successful=true
     else
       echo ">> [$(date)] Failed build for ${DEVICE}"
@@ -235,27 +233,27 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     # Remove old zips and logs
     if [ "$DELETE_OLD_ZIPS" -gt "0" ]; then
       if [ "$ZIP_SUBDIR" = true ]; then
-        /usr/bin/python /root/clean_up.py -n $DELETE_OLD_ZIPS -V $los_ver -N 1 "$ZIP_DIR/$zipsubdir"
+        /usr/bin/python /root/clean_up.py -n "$DELETE_OLD_ZIPS" -V "$los_ver" -N 1 "$ZIP_DIR/$zipsubdir"
       else
-        /usr/bin/python /root/clean_up.py -n $DELETE_OLD_ZIPS -V $los_ver -N 1 -c ${DEVICE} "$ZIP_DIR"
+        /usr/bin/python /root/clean_up.py -n "$DELETE_OLD_ZIPS" -V "$los_ver" -N 1 -c "${DEVICE}" "$ZIP_DIR"
       fi
     fi
     if [ "$DELETE_OLD_LOGS" -gt "0" ]; then
       if [ "$LOGS_SUBDIR" = true ]; then
-        /usr/bin/python /root/clean_up.py -n $DELETE_OLD_LOGS -V $los_ver -N 1 "$LOGS_DIR/$logsubdir"
+        /usr/bin/python /root/clean_up.py -n "$DELETE_OLD_LOGS" -V "$los_ver" -N 1 "$LOGS_DIR/$logsubdir"
       else
-        /usr/bin/python /root/clean_up.py -n $DELETE_OLD_LOGS -V $los_ver -N 1 -c ${DEVICE} "$LOGS_DIR"
+        /usr/bin/python /root/clean_up.py -n "$DELETE_OLD_LOGS" -V "$los_ver" -N 1 -c "${DEVICE}" "$LOGS_DIR"
       fi
     fi
     if [ -f /root/userscripts/post-build.sh ]; then
       echo ">> [$(date)] Running post-build.sh for ${DEVICE}"
-      /root/userscripts/post-build.sh ${DEVICE} $build_successful
+      /root/userscripts/post-build.sh "${DEVICE}" "$build_successful"
     fi
     echo ">> [$(date)] Finishing build for ${DEVICE}"
 
     if [ "$CLEAN_AFTER_BUILD" = true ]; then
       echo ">> [$(date)] Cleaning source dir for device ${DEVICE}"
-      cd "$source_dir"
+      cd "$source_dir" || return 1
       mka clean
     fi
 
@@ -267,7 +265,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 fi
 
 if [ "$DELETE_OLD_LOGS" -gt "0" ]; then
-  find "$LOGS_DIR" -maxdepth 1 -name repo-*.log | sort | head -n -$DELETE_OLD_LOGS | xargs -r rm
+  find "$LOGS_DIR" -maxdepth 1 -name "repo-*.log" | sort | head -n -"$DELETE_OLD_LOGS" | xargs -r rm
 fi
 
 if [ -f /root/userscripts/end.sh ]; then

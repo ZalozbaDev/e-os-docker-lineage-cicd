@@ -19,18 +19,18 @@
 
 # Copy the user scripts
 mkdir -p /root/userscripts
-cp -r $USERSCRIPTS_DIR/. /root/userscripts
+cp -r "$USERSCRIPTS_DIR/." /root/userscripts
 find /root/userscripts ! -type d ! -user root -exec echo ">> [$(date)] {} is not owned by root, removing" \; -exec rm {} \;
 find /root/userscripts ! -type d -perm /g=w,o=w -exec echo ">> [$(date)] {} is writable by non-root users, removing" \; -exec rm {} \;
 
 # Initialize CCache if it will be used
 if [ "$USE_CCACHE" = 1 ]; then
-  ccache -M $CCACHE_SIZE 2>&1
+  ccache -M "$CCACHE_SIZE" 2>&1
 fi
 
 # Initialize Git user information
-git config --global user.name $USER_NAME
-git config --global user.email $USER_MAIL
+git config --global user.name "$USER_NAME"
+git config --global user.email "$USER_MAIL"
 
 if [ "$SIGN_BUILDS" = true ]; then
   if [ -z "$(ls -A "$KEYS_DIR")" ]; then
@@ -64,7 +64,7 @@ else
   cronFile=/tmp/buildcron
   printf "SHELL=/bin/bash\n" > $cronFile
   printenv -0 | sed -e 's/=\x0/=""\n/g'  | sed -e 's/\x0/\n/g' | sed -e "s/_=/PRINTENV=/g" >> $cronFile
-  printf "\n$CRONTAB_TIME /usr/bin/flock -n /var/lock/build.lock /root/build.sh >> /var/log/docker.log 2>&1\n" >> $cronFile
+  printf '\n%s /usr/bin/flock -n /var/lock/build.lock /root/build.sh >> /var/log/docker.log 2>&1\n' "$CRONTAB_TIME">> $cronFile
   crontab $cronFile
   rm $cronFile
 
