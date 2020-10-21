@@ -289,7 +289,15 @@ for branch in ${BRANCH_NAME//,/ }; do
         echo "ANDROID_JACK_VM_ARGS=${ANDROID_JACK_VM_ARGS}"
         echo "Switch to Python2"
         ln -fs /usr/bin/python2 /usr/bin/python
-        if brunch $codename &>> "$DEBUG_LOG"; then
+
+
+        BRUNCH_DEVICE=${codename}
+
+        if [ "${ENG_BUILD}" = true ]; then
+          BRUNCH_DEVICE=lineage_${codename}-eng
+        fi
+
+        if brunch ${BRUNCH_DEVICE} &>> "$DEBUG_LOG"; then
           currentdate=$(date +%Y%m%d)
           if [ "$builddate" != "$currentdate" ]; then
             find out/target/product/$codename -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \; &>> "$DEBUG_LOG"

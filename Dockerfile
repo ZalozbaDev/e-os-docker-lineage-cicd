@@ -96,6 +96,10 @@ ENV RECOVERY_IMG false
 # Ship with Minimal Apps
 ENV MINIMAL_APPS false
 
+# Force an eng build even when device name doesn't contain -eng
+ENV ENG_BUILD false
+
+
 # You can optionally specify a USERSCRIPTS_DIR volume containing these scripts:
 #  * begin.sh, run at the very beginning
 #  * before.sh, run after the syncing and patching, before starting the builds
