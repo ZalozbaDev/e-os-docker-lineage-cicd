@@ -197,7 +197,14 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     echo "ANDROID_JACK_VM_ARGS=${ANDROID_JACK_VM_ARGS}"
     echo "Switch to Python2"
     ln -fs /usr/bin/python2 /usr/bin/python
-    if brunch ${DEVICE}; then
+    
+    BRUNCH_DEVICE=${DEVICE}
+    
+    if [ "${ENG_BUILD}" = true ]; then
+      BRUNCH_DEVICE=lineage_${DEVICE}-eng
+    fi
+    
+    if brunch ${BRUNCH_DEVICE}; then
       currentdate=$(date +%Y%m%d)
       if [ "$builddate" != "$currentdate" ]; then
         find out/target/product/${DEVICE} -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} $currentdate $builddate \;
