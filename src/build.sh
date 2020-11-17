@@ -222,6 +222,13 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           md5sum "IMG-$build" > "IMG-$build.md5sum"
           cd "$source_dir/out/target/product/${DEVICE}" || return 1
         fi
+        if [ "$BACKUP_INTERMEDIATE_SYSTEM_IMG" = true ]; then
+          mv obj/PACKAGING/target_files_intermediates/lineage*/IMAGES/system.img ./
+          zip "$ZIP_DIR/$zipsubdir/SYSTEM-$build" system.img
+          cd $ZIP_DIR/$zipsubdir
+          sha256sum "SYSTEM-$build" > "SYSTEM-$build.sha256sum"
+          md5sum "SYSTEM-$build" > "SYSTEM-$build.md5sum"
+        fi
 
 	if [ "$RECOVERY_IMG" = true ]; then
 	  if [ -f "recovery.img" ]; then
