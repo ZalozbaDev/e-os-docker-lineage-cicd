@@ -224,10 +224,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         fi
         if [ "$BACKUP_INTERMEDIATE_SYSTEM_IMG" = true ]; then
           mv obj/PACKAGING/target_files_intermediates/lineage*/IMAGES/system.img ./
-          zip "$ZIP_DIR/$zipsubdir/SYSTEM-$build" system.img
+          zip "$ZIP_DIR/$zipsubdir/IMG-$build" system.img
           cd $ZIP_DIR/$zipsubdir
-          sha256sum "SYSTEM-$build" > "SYSTEM-$build.sha256sum"
-          md5sum "SYSTEM-$build" > "SYSTEM-$build.md5sum"
+          sha256sum "IMG-$build" > "IMG-$build.sha256sum"
+          md5sum "IMG-$build" > "IMG-$build.md5sum"
         fi
 
 	if [ "$RECOVERY_IMG" = true ]; then
