@@ -230,13 +230,19 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           md5sum "IMG-$build" > "IMG-$build.md5sum"
         fi
 
-	if [ "$RECOVERY_IMG" = true ]; then
-	  if [ -f "recovery.img" ]; then
-	    cp -a recovery.img "$ZIP_DIR/$zipsubdir/recovery-${build%.*}.img"
-	  else
-	    cp -a boot.img "$ZIP_DIR/$zipsubdir/recovery-${build%.*}.img"
-	  fi
-	fi
+      	if [ "$RECOVERY_IMG" = true ]; then
+
+          RECOVERY_IMG_NAME="recovery-${build%.*}.img"
+
+      	  if [ -f "recovery.img" ]; then
+      	    cp -a recovery.img "$RECOVERY_IMG_NAME"
+      	  else
+      	    cp -a boot.img "$RECOVERY_IMG_NAME"
+      	  fi
+
+          sha256sum "$RECOVERY_IMG_NAME" > "$RECOVERY_IMG_NAME.sha256sum"
+          mv "$RECOVERY_IMG_NAME*" "$ZIP_DIR/$zipsubdir/"
+      	fi
       done
 
       cd "$source_dir" || return 1
