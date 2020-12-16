@@ -228,6 +228,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           cd $ZIP_DIR/$zipsubdir
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
           md5sum "IMG-$build" > "IMG-$build.md5sum"
+          cd "$source_dir/out/target/product/${DEVICE}" || return 1
         fi
 
 	if [ "$RECOVERY_IMG" = true ]; then
