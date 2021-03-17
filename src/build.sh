@@ -202,7 +202,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       BRUNCH_DEVICE=lineage_${DEVICE}-eng
     fi
 
-    if brunch "${BRUNCH_DEVICE}"; then
+    if lunch "${BRUNCH_DEVICE}"; then
       currentdate=$(date +%Y%m%d)
       if [ "$builddate" != "$currentdate" ]; then
         find "out/target/product/${DEVICE}" -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} "$currentdate" "$builddate" \;
