@@ -201,17 +201,32 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     if [ "${ENG_BUILD}" = true ]; then
       BRUNCH_DEVICE=lineage_${DEVICE}-eng
     fi
+    build_success=false
+    if [ "${BUILD_ONLY_SYSTEMIMAGE}" = true ]; then
+      breakfast "${BRUNCH_DEVICE}"
+      if make systemimage; then
+        build_success=true
+      fi
+    else
+      if brunch "${BRUNCH_DEVICE}"; then
+        build_success=true
+      fi
+    fi
 
-    if brunch "${BRUNCH_DEVICE}"; then
+    if [ "$build_success" = true ]; then
       currentdate=$(date +%Y%m%d)
       if [ "$builddate" != "$currentdate" ]; then
-        find "out/target/product/${DEVICE}" -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} "$currentdate" "$builddate" \;
+        find "${OUT}" -maxdepth 1 -name "e-*-$currentdate-*.zip*" -type f -exec sh /root/fix_build_date.sh {} "$currentdate" "$builddate" \;
       fi
 
       # Move produced ZIP files to the main OUT directory
       echo ">> [$(date)] Moving build artifacts for ${DEVICE} to '$ZIP_DIR/$zipsubdir'"
-      cd "out/target/product/${DEVICE}" || return 1
+      cd "${OUT}" || return 1
       for build in e-*.zip; do
+        #with only systemimage, we don't have a e-*.zip
+        if [ "${BUILD_ONLY_SYSTEMIMAGE}" = true ]; then
+          build=e-`grep lineage.version system/build.prop | sed s/#.*// | sed s/.*=// | tr -d \\n`.zip
+        fi
         sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
         find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
 
@@ -220,7 +235,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           cd "$ZIP_DIR/$zipsubdir" || return 1
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
           md5sum "IMG-$build" > "IMG-$build.md5sum"
-          cd "$source_dir/out/target/product/${DEVICE}" || return 1
+          cd "${OUT}" || return 1
         fi
         if [ "$BACKUP_INTERMEDIATE_SYSTEM_IMG" = true ]; then
           mv obj/PACKAGING/target_files_intermediates/lineage*/IMAGES/system.img ./
@@ -228,7 +243,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           cd $ZIP_DIR/$zipsubdir
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
           md5sum "IMG-$build" > "IMG-$build.md5sum"
-          cd "$source_dir/out/target/product/${DEVICE}" || return 1
+          cd "${OUT}" || return 1
         fi
 
       	if [ "$RECOVERY_IMG" = true ]; then
