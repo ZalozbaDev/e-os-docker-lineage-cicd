@@ -157,7 +157,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python
 # Use adoptopenjdk.net to be able to use OpeJDK8 on debian:buster
 RUN curl -q https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
 RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
-RUN apt-get -qq update && apt-get install -y adoptopenjdk-8-hotspot
+RUN apt-get -qq update && apt-get install -y adoptopenjdk-8-hotspot=8u282-b08-3
 RUN update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
 
 # Set the work directory
