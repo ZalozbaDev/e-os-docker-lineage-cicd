@@ -56,6 +56,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       themuppets_branch="lineage-17.1"
       android_version="10"
       ;;
+    *r*)
+      themuppets_branch="lineage-18.1"
+      android_version="11"
+      ;;
     *)
       echo ">> [$(date)] Building branch $branch is not (yet) suppported"
       exit 1
