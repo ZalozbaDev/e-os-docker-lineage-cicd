@@ -114,6 +114,12 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   then
     sync_successful=false
   fi
+  
+  if [ -f /root/userscripts/clean.sh ]; then
+    echo ">> [$(date)] Running clean.sh"
+    /root/userscripts/clean.sh
+  fi
+
 
   if [ ! -d "vendor/$vendor" ]; then
     echo ">> [$(date)] Missing \"vendor/$vendor\", aborting"
