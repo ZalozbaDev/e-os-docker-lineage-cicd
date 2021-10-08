@@ -168,10 +168,6 @@ for branch in ${BRANCH_NAME//,/ }; do
       exit 1
     fi
 
-    # Set up our overlay
-    mkdir -p "vendor/$vendor/overlay/microg/"
-    sed -i "1s;^;PRODUCT_PACKAGE_OVERLAYS := vendor/$vendor/overlay/microg\n;" "vendor/$vendor/config/common.mk"
-
     los_ver_major=$(sed -n -e 's/^\s*PRODUCT_VERSION_MAJOR = //p' "vendor/$vendor/config/common.mk")
     los_ver_minor=$(sed -n -e 's/^\s*PRODUCT_VERSION_MINOR = //p' "vendor/$vendor/config/common.mk")
     los_ver="$los_ver_major.$los_ver_minor"
