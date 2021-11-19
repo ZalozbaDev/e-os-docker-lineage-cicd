@@ -211,10 +211,12 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       if make systemimage; then
         build_success=true
       fi
-    else
-      if brunch "${BRUNCH_DEVICE}"; then
+    elif [ "${USE_LUNCH}" = true ]; then
+      if lunch "${BRUNCH_DEVICE}" && mka && mka sdk_addon ; then
         build_success=true
       fi
+    elif brunch "${BRUNCH_DEVICE}"; then
+        build_success=true
     fi
 
     if [ "$build_success" = true ]; then
@@ -226,7 +228,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       # Move produced ZIP files to the main OUT directory
       echo ">> [$(date)] Moving build artifacts for ${DEVICE} to '$ZIP_DIR/$zipsubdir'"
       cd "${OUT}" || return 1
-      for build in e-*.zip; do
+      for build in $(ls e-*.zip); do
         #with only systemimage, we don't have a e-*.zip
         if [ "${BUILD_ONLY_SYSTEMIMAGE}" = true ]; then
           build=e-`grep lineage.version system/build.prop | sed s/#.*// | sed s/.*=// | tr -d \\n`.zip
@@ -264,6 +266,14 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           mv "$RECOVERY_IMG_NAME"* "$ZIP_DIR/$zipsubdir/"
       	fi
       done
+
+      if [ "$IS_EMULATOR" = true -a "$BACKUP_EMULATOR" = true ]; then
+        EMULATOR_ARCHIVE="e-android$android_version-eng-$currentdate-linux-x86-img.zip"
+        mv ../../../host/linux-x86/sdk_addon/*-img.zip "$ZIP_DIR/$zipsubdir/$EMULATOR_ARCHIVE"
+        pushd "$ZIP_DIR/$zipsubdir"
+        sha256sum "$EMULATOR_ARCHIVE" > "$EMULATOR_ARCHIVE.sha256sum"
+        popd
+      fi
 
       cd "$source_dir" || return 1
       build_successful=true

@@ -102,6 +102,12 @@ ENV ENG_BUILD false
 #Save intermediate system.img even when not in out folder
 ENV BACKUP_INTERMEDIATE_SYSTEM_IMG false
 
+# Backup emulator files
+ENV BACKUP_EMULATOR false
+
+# Use lunch command (by default, it's brunch)
+ENV USE_LUNCH false
+
 
 # You can optionally specify a USERSCRIPTS_DIR volume containing these scripts:
 #  * begin.sh, run at the very beginning
