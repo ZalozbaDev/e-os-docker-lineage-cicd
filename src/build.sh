@@ -216,7 +216,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         build_success=true
       fi
     elif [ "${USE_LUNCH}" = true ]; then
-      if lunch "${BRUNCH_DEVICE}" && mka && mka sdk_addon ; then
+      if lunch "${BRUNCH_DEVICE}" && mka sdk_addon ; then
         build_success=true
       fi
     elif brunch "${BRUNCH_DEVICE}"; then
