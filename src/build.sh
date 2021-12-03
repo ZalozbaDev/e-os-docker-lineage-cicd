@@ -18,6 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # cd to working directory
+
+-set x
+
+
 cd "$SRC_DIR" || return 1
 
 if [ -f /root/userscripts/begin.sh ]; then
