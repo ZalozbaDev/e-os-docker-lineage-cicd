@@ -222,7 +222,6 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           build_success=true
         fi
       fi
-    fi
     elif brunch "${BRUNCH_DEVICE}"; then
         build_success=true
     fi
