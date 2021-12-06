@@ -213,21 +213,6 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       fi
     elif [ "${USE_LUNCH}" = true ]; then
       if lunch "${BRUNCH_DEVICE}" && mka && mka sdk_addon ; then
-        APK_PATH="out/target/product/${DEVICE}/system/priv-app/${APP_NAME}/${APP_NAME}.apk"
-        if [ ! -f "$APK_PATH" ] ;then
-          echo "system priv app for pie or oreo"
-          APK_PATH="out/target/product/${DEVICE}/system/app/${APP_NAME}/${APP_NAME}.apk"
-          if [ ! -f "$APK_PATH" ] ; then
-            APK_PATH="out/target/product/${DEVICE}/system/product/priv-app/${APP_NAME}/${APP_NAME}.apk"
-            if [ ! -f "$APK_PATH" ] ;then
-              APK_PATH="out/target/product/${DEVICE}/system/product/app/${APP_NAME}/${APP_NAME}.apk"
-            fi
-          fi
-        fi
-
-        echo ">> [$(date)] APK path: ${APK_PATH}"
-        echo ">> [$(date)] App signature"
-        java -jar /usr/bin/apksigner sign --key build/target/product/security/platform.pk8 --cert build/target/product/security/platform.x509.pem --out ${APK_PATH} ${APK_PATH}
         build_success=true
       fi
     elif [[ ! -z "${APP_NAME}" ]]; then
@@ -298,7 +283,27 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       fi
 
       if [[ ! -z "${APP_NAME}" ]]; then
+
+        echo ">> [$(date)] ===== TEST ====="
+        pwd
+
+        APK_PATH="${DEVICE}/system/priv-app/${APP_NAME}/${APP_NAME}.apk"
+        if [ ! -f "$APK_PATH" ]; then
+          APK_PATH="${DEVICE}/system/app/${APP_NAME}/${APP_NAME}.apk"
+          if [ ! -f "$APK_PATH" ]; then
+            APK_PATH="${DEVICE}/system/product/priv-app/${APP_NAME}/${APP_NAME}.apk"
+            if [ ! -f "$APK_PATH" ]; then
+              APK_PATH="${DEVICE}/system/product/app/${APP_NAME}/${APP_NAME}.apk"
+            fi
+          fi
+        fi
+
         mv ${APK_PATH} "$ZIP_DIR/$zipsubdir"
+
+        echo ">> [$(date)] APK path: ${APK_PATH}"
+        echo ">> [$(date)] App signature"
+        java -jar /usr/bin/apksigner sign --key build/target/product/security/platform.pk8 --cert build/target/product/security/platform.x509.pem --out "$ZIP_DIR/$zipsubdir/${APK_PATH}.apk" "$ZIP_DIR/$zipsubdir/${APK_PATH}.apk"
+
       fi
 
       cd "$source_dir" || return 1
