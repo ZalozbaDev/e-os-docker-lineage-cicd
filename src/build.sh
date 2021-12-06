@@ -282,7 +282,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         popd
       fi
 
-      if [[ ! -z "${APP_NAME}" ]];; then
+      if [[ ! -z "${APP_NAME}" ]]; then
         APK_PATH="out/target/product/${DEVICE}/system/priv-app/${APP_NAME}/${APP_NAME}.apk"
         if [ ! -f "$APK_PATH" ] ;then
           echo "system priv app for pie or oreo"
