@@ -302,7 +302,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
         echo ">> [$(date)] APK path: ${APK_PATH}"
         echo ">> [$(date)] App signature"
-        java -jar /usr/bin/apksigner sign --key build/target/product/security/platform.pk8 --cert build/target/product/security/platform.x509.pem --out "$ZIP_DIR/$zipsubdir/${APK_PATH}.apk" "$ZIP_DIR/$zipsubdir/${APK_PATH}.apk"
+        java -jar /usr/bin/apksigner sign --key $SRC_DIR/build/target/product/security/platform.pk8 --cert $SRC_DIR/build/target/product/security/platform.x509.pem --out "$ZIP_DIR/$zipsubdir/${APK_PATH}.apk" "$ZIP_DIR/$zipsubdir/${APK_PATH}.apk"
 
       fi
 
