@@ -211,8 +211,8 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       if make systemimage; then
         build_success=true
       fi
-    elif [ "${USE_LUNCH}" = true ]; then
-      if lunch "${BRUNCH_DEVICE}" && mka && mka sdk_addon ; then
+    elif [ "${IS_EMULATOR}" = true ]; then
+      if lunch "${BRUNCH_DEVICE}" && mka sdk_addon ; then
         build_success=true
       fi
     elif brunch "${BRUNCH_DEVICE}"; then

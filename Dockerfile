@@ -153,7 +153,7 @@ RUN apt-get install -y bc bison bsdmainutils build-essential ccache cgpt clang c
       lib32ncurses5-dev libncurses5 lib32readline-dev lib32z1-dev libtinfo5 liblz4-tool \
       libncurses5-dev libsdl1.2-dev libssl-dev libxml2 \
       libxml2-utils lsof lzop maven pngcrush \
-      procps python python3 rsync schedtool squashfs-tools software-properties-common wget xdelta3 xsltproc yasm \
+      procps python python3 rsync schedtool squashfs-tools software-properties-common wget xdelta3 xsltproc xxd yasm \
       zip zlib1g-dev
 
 RUN curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo
