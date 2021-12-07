@@ -287,13 +287,13 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         echo ">> [$(date)] ===== TEST ====="
         pwd
 
-        APK_PATH="${DEVICE}/system/priv-app/${APP_NAME}/${APP_NAME}.apk"
+        APK_PATH="$source_dir/system/priv-app/${APP_NAME}/${APP_NAME}.apk"
         if [ ! -f "$APK_PATH" ]; then
-          APK_PATH="${DEVICE}/system/app/${APP_NAME}/${APP_NAME}.apk"
+          APK_PATH="$source_dir/system/app/${APP_NAME}/${APP_NAME}.apk"
           if [ ! -f "$APK_PATH" ]; then
-            APK_PATH="${DEVICE}/system/product/priv-app/${APP_NAME}/${APP_NAME}.apk"
+            APK_PATH="$source_dir/system/product/priv-app/${APP_NAME}/${APP_NAME}.apk"
             if [ ! -f "$APK_PATH" ]; then
-              APK_PATH="${DEVICE}/system/product/app/${APP_NAME}/${APP_NAME}.apk"
+              APK_PATH="$source_dir/system/product/app/${APP_NAME}/${APP_NAME}.apk"
             fi
           fi
         fi
