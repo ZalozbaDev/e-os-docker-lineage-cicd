@@ -215,6 +215,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       if lunch "${BRUNCH_DEVICE}" && mka sdk_addon ; then
         build_success=true
       fi
+    elif [ "${BUILD_SUPER_IMAGE}" = true ]; then
+      if lunch "${BRUNCH_DEVICE}" && mka bacon superimage; then
+        build_success=true
+      fi
     elif brunch "${BRUNCH_DEVICE}"; then
         build_success=true
     fi
@@ -237,7 +241,12 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
 
         if [ "$BACKUP_IMG" = true ]; then
-          find . -maxdepth 1 -name '*.img' -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+          if [ "$BUILD_SUPER_IMAGE" = true ]; then
+	    SKIP_DYNAMIC_IMAGES="odm.img product.img system.img system_ext.img vendor.img"
+	    find . -maxdepth 1 -name '*.img' -type f $(printf "! -name %s " $(echo "$SKIP_DYNAMIC_IMAGES")) -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+	  else
+            find . -maxdepth 1 -name '*.img' -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+	  fi
           cd "$ZIP_DIR/$zipsubdir" || return 1
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
           md5sum "IMG-$build" > "IMG-$build.md5sum"
