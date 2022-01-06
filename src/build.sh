@@ -216,7 +216,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         build_success=true
       fi
     elif [ "${BUILD_SUPER_IMAGE}" = true ]; then
-      if lunch "${BRUNCH_DEVICE}" && mka bacon superimage; then
+      if breakfast "${BRUNCH_DEVICE}" && mka bacon superimage; then
         build_success=true
       fi
     elif brunch "${BRUNCH_DEVICE}"; then
