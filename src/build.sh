@@ -290,6 +290,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       echo ">> [$(date)] Failed build for ${DEVICE}"
       echo "running diagnose"
       ./prebuilts/sdk/tools/jack-diagnose
+      read -p 'Press [Enter] key to continue...'
     fi
 
     # Remove old zips and logs
