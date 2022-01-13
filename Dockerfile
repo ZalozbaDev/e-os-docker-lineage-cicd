@@ -165,7 +165,9 @@ RUN curl -q https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-
 RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
 RUN apt-get -qq update && apt-get install -y adoptopenjdk-8-hotspot
 RUN update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
-
+# Fix jack server SSL issue during build
+RUN perl -0777 -i -p -e 's/(jdk.tls.disabledAlgorithms=.*?), TLSv1, TLSv1\.1/$1/g' \
+     /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/jre/lib/security/java.security
 # Set the work directory
 ########################
 WORKDIR $SRC_DIR
