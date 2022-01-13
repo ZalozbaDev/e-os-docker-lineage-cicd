@@ -290,6 +290,8 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       echo ">> [$(date)] Failed build for ${DEVICE}"
       echo "running diagnose"
       ./prebuilts/sdk/tools/jack-diagnose
+      echo "pause for 1000 sec"
+      sleep 3000
       read -p 'Press [Enter] key to continue...'
     fi
 
