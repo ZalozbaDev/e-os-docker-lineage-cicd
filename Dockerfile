@@ -152,7 +152,7 @@ RUN apt-get install -y bc bison bsdmainutils build-essential ccache cgpt clang c
       curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick kmod \
       lib32ncurses5-dev libncurses5 lib32readline-dev lib32z1-dev libtinfo5 liblz4-tool \
       libncurses5-dev libsdl1.2-dev libssl-dev libxml2 \
-      libxml2-utils lsof lzop maven pngcrush \
+      libxml2-utils lsof lzop maven openjdk-8-jdk pngcrush \
       procps python python3 rsync schedtool squashfs-tools software-properties-common wget xdelta3 xsltproc xxd yasm \
       zip zlib1g-dev
 
@@ -165,6 +165,12 @@ RUN curl -q https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-
 RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
 RUN apt-get -qq update && apt-get install -y adoptopenjdk-8-hotspot=8u282-b08-3
 RUN update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
+
+
+# Fix jack server SSL issue during build for openjdk (adoptopenjdk won't work for nougat and oreo)
+RUN perl -0777 -i -p -e 's/(jdk.tls.disabledAlgorithms=.*?), TLSv1, TLSv1\.1/$1/g' \
+      /etc/java-8-openjdk/security/java.security
+
 
 # Set the work directory
 ########################

@@ -33,6 +33,7 @@ fi
 
 sync_successful=true
 
+use_openjdk_from_ubuntu=false
 branch_dir=$(sed 's/.*-\([a-zA-Z]*\)$/\1/' <<< "${BRANCH_NAME}")
 branch_dir=${branch_dir^^}
 
@@ -43,10 +44,12 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       vendor="cm"
       themuppets_branch="cm-14.1"
       android_version="7.1.2"
+      use_openjdk_from_ubuntu=true
       ;;
     *oreo*)
       themuppets_branch="lineage-15.1"
       android_version="8.1"
+      use_openjdk_from_ubuntu=true
       ;;
     *pie*)
       themuppets_branch="lineage-16.0"
@@ -191,6 +194,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
     if [ "$build_device" = false ]; then
       echo ">> [$(date)] No build for ${DEVICE}"
+    fi
+
+    if [ "$use_openjdk_from_ubuntu" = true ]; then
+      update-java-alternatives -s java-1.8.0-openjdk-amd64
     fi
 
     # Start the build
