@@ -44,6 +44,10 @@ ENV RELEASE_TYPE 'UNOFFICIAL'
 # Repo use for build
 ENV REPO 'https://gitlab.e.foundation/e/os/android.git'
 
+# Optional parameter to repo init --depth N
+# A size of 0 deactivates --depth N
+ENV REPO_INIT_DEPTH 0
+
 # User identity
 ENV USER_NAME '/e/ robot'
 ENV USER_MAIL 'erobot@e.email'
