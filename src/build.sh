@@ -243,10 +243,6 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       echo ">> [$(date)] Moving build artifacts for ${DEVICE} to '$ZIP_DIR/$zipsubdir'"
       cd "${OUT}" || return 1
       for build in $(ls e-*.zip); do
-        #with only systemimage, we don't have a e-*.zip
-        if [ "${BUILD_ONLY_SYSTEMIMAGE}" = true ]; then
-          build=e-`grep lineage.version system/build.prop | sed s/#.*// | sed s/.*=// | tr -d \\n`.zip
-        fi
         sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
         find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
 
@@ -285,6 +281,19 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           mv "$RECOVERY_IMG_NAME"* "$ZIP_DIR/$zipsubdir/"
       	fi
       done
+
+      #with only systemimage, we don't have a e-*.zip
+      if [ "${BUILD_ONLY_SYSTEMIMAGE}" = true ]; then
+        build=e-`grep lineage.version system/build.prop | sed s/#.*// | sed s/.*=// | tr -d \\n`.zip
+        if [ "$BACKUP_INTERMEDIATE_SYSTEM_IMG" = true ]; then
+          mv obj/PACKAGING/target_files_intermediates/lineage*/IMAGES/system.img ./
+          zip "$ZIP_DIR/$zipsubdir/IMG-$build" system.img
+          cd $ZIP_DIR/$zipsubdir
+          sha256sum "IMG-$build" > "IMG-$build.sha256sum"
+          md5sum "IMG-$build" > "IMG-$build.md5sum"
+          cd "${OUT}" || return 1
+        fi
+      fi
 
       if [ "$IS_EMULATOR" = true -a "$BACKUP_EMULATOR" = true ]; then
         EMULATOR_ARCHIVE="e-android$android_version-eng-$currentdate-linux-x86-img.zip"
