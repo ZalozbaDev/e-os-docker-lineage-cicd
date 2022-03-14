@@ -214,7 +214,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
     if [ "${ENG_BUILD}" = true ]; then
       BRUNCH_DEVICE=lineage_${DEVICE}-eng
+    elif [ "${USER_BUILD}" = true ]; then
+      BRUNCH_DEVICE=lineage_${DEVICE}-user
     fi
+
     build_success=false
     if [ "${BUILD_ONLY_SYSTEMIMAGE}" = true ]; then
       breakfast "${BRUNCH_DEVICE}"
