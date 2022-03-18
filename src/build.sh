@@ -119,7 +119,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   if ! repo sync -c --force-sync
   then
     sync_successful=false
+  else
+    repo forall -c 'git lfs pull'
   fi
+  
 
   if [ ! -d "vendor/$vendor" ]; then
     echo ">> [$(date)] Missing \"vendor/$vendor\", aborting"

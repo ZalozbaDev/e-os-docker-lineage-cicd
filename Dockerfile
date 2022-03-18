@@ -153,7 +153,7 @@ RUN apt-get -qq update
 RUN apt-get -qqy upgrade
 
 RUN apt-get install -y bc bison bsdmainutils build-essential ccache cgpt clang cron \
-      curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick kmod \
+      curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf imagemagick kmod \
       lib32ncurses5-dev libncurses5 lib32readline-dev lib32z1-dev libtinfo5 liblz4-tool \
       libncurses5-dev libsdl1.2-dev libssl-dev libxml2 \
       libxml2-utils lsof lzop maven openjdk-8-jdk pngcrush \
