@@ -70,6 +70,8 @@ if [ "$LOCAL_MIRROR" = true ]; then
 
   if [ $? != 0 ]; then
     sync_successful=false
+  else
+    repo forall -c 'git lfs pull'
   fi
 fi
 
@@ -161,6 +163,8 @@ for branch in ${BRANCH_NAME//,/ }; do
 
     if [ $? != 0 ]; then
       sync_successful=false
+    else 
+      repo forall -c 'git lfs pull'
     fi
 
     if [ ! -d "vendor/$vendor" ]; then
@@ -232,6 +236,8 @@ for branch in ${BRANCH_NAME//,/ }; do
             if [ $? != 0 ]; then
               sync_successful=false
               build_device=false
+            else
+              repo forall -c 'git lfs pull'
             fi
           fi
 
@@ -242,6 +248,8 @@ for branch in ${BRANCH_NAME//,/ }; do
           if [ $? != 0 ]; then
             sync_successful=false
             build_device=false
+          else
+            repo forall -c 'git lfs pull'
           fi
         fi
 
