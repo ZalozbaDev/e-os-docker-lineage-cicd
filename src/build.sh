@@ -256,7 +256,11 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           if [ "$BUILD_SUPER_IMAGE" = true ]; then
 	    SKIP_DYNAMIC_IMAGES="odm.img product.img system.img system_ext.img vendor.img"
 	    find . -maxdepth 1 -name '*.img' -type f $(printf "! -name %s " $(echo "$SKIP_DYNAMIC_IMAGES")) -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
-	  else
+          elif [ "$SPARSE_PREBUILT_VENDOR_IMAGE" = true ]; then
+            echo "Sparsing prebuilt vendor image"
+            img2simg vendor.img vendor-sparsed.img || return 1
+            find . -maxdepth 1 -name '*.img' -type f ! -name vendor.img -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+          else
             find . -maxdepth 1 -name '*.img' -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
 	  fi
           cd "$ZIP_DIR/$zipsubdir" || return 1
