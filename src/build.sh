@@ -115,11 +115,29 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
   echo ">> [$(date)] Syncing branch repository"
   builddate=$(date +%Y%m%d)
+  repo_out=$(repo sync -c --force-sync 2>&1 > /dev/null)
+  repo_status=$?
+  echo -e $repo_out
 
-  if ! repo sync -c --force-sync
-  then
-    sync_successful=false
-  else
+  if [ "$repo_status" != "0" ];  then
+    if [ -f /root/userscripts/clean.sh ]; then
+      if [[ "$repo_out" == *"Failing repos:"* ]]; then
+        list_line=`echo -e $repo_out | sed 's/.*Failing repos: //'`
+      fi
+      if [[ "$repo_out" == *"Cannot remove project"* ]]; then
+        list_line=`echo -e $repo_out | grep "Cannot remove project" | sed -e 's/.*error: \(.*\): Cannot.*/\1/'`
+      fi
+      echo ">> [$(date)] Running clean.sh"
+      /root/userscripts/clean.sh $list_line
+      if ! repo sync -c --force-sync ; then
+        sync_successful=false
+      fi
+    else
+      sync_successful=false
+    fi
+  fi
+
+  if [ "$sync_successful" = true ]; then
     repo forall -c 'git lfs pull'
   fi
   
