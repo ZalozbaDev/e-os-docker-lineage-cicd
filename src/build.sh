@@ -332,6 +332,8 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       fi
 
       cd "$source_dir" || return 1
+      echo ">> [$(date)] backup manifest for ${DEVICE}"
+      repo manifest -r -o "$ZIP_DIR/$zipsubdir"/${build%???}xml
       build_successful=true
     else
       echo ">> [$(date)] Failed build for ${DEVICE}"
