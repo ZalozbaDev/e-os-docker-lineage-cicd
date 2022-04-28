@@ -270,9 +270,9 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         sha256sum "$build" > "$ZIP_DIR/$zipsubdir/$build.sha256sum"
         find . -maxdepth 1 -name 'e-*.zip*' -type f -exec mv {} "$ZIP_DIR/$zipsubdir/" \;
 
+        SKIP_DYNAMIC_IMAGES="odm.img product.img system.img system_ext.img vendor.img"
         if [ "$BACKUP_IMG" = true ]; then
           if [ "$BUILD_SUPER_IMAGE" = true ]; then
-	    SKIP_DYNAMIC_IMAGES="odm.img product.img system.img system_ext.img vendor.img"
 	    find . -maxdepth 1 -name '*.img' -type f $(printf "! -name %s " $(echo "$SKIP_DYNAMIC_IMAGES")) -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
           elif [ "$SPARSE_PREBUILT_VENDOR_IMAGE" = true ]; then
             echo "Sparsing prebuilt vendor image"
@@ -292,6 +292,15 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
           cd $ZIP_DIR/$zipsubdir
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
           md5sum "IMG-$build" > "IMG-$build.md5sum"
+          cd "${OUT}" || return 1
+        fi
+        if [ "$EDL_RAW_SUPER_IMAGE" = true ]; then
+          echo "Unsparsing super image"
+          simg2img super.img super.raw.img || return 1
+          find . -maxdepth 1 -name '*.img' -type f ! -name super.img $(printf "! -name %s " $(echo "$SKIP_DYNAMIC_IMAGES")) -exec zip "$ZIP_DIR/$zipsubdir/EDL-$build" {} \;
+          cd "$ZIP_DIR/$zipsubdir" || return 1
+          sha256sum "EDL-$build" > "EDL-$build.sha256sum"
+          md5sum "EDL-$build" > "EDL-$build.md5sum"
           cd "${OUT}" || return 1
         fi
 
