@@ -237,6 +237,8 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       BRUNCH_DEVICE=lineage_${DEVICE}-eng
     elif [ "${USER_BUILD}" = true ]; then
       BRUNCH_DEVICE=lineage_${DEVICE}-user
+    elif [ "${IS_EMULATOR}" = true ]; then
+      BRUNCH_DEVICE=lineage_${DEVICE}-userdebug
     fi
 
     build_success=false
