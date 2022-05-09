@@ -100,8 +100,8 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   fi
 
   if [[ ! -z "$MANIFEST_URL" ]]; then
+    echo ">> [$(date)] Using manual manifest: $MANIFEST_URL"
     wget -O custom_manifest.xml "$MANIFEST_URL"
-    echo ">> [$(date)] Using manual manifest:"
     yes | repo init -m custom_manifest.xml
   else
     yes | repo init $REPO_INIT_PARAM -u "$REPO" -b "${TAG_PREFIX}${BRANCH_NAME}"
