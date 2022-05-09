@@ -99,9 +99,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
     REPO_INIT_PARAM="--depth ${REPO_INIT_DEPTH}"
   fi
 
-  if [ -f "$MANIFEST" ]; then
+  if [[ ! -z "$MANIFEST" ]]; then
+    wget -O custom_manifest.xml "$MANIFEST"
     echo ">> [$(date)] Using manual manifest:"
-    yes | repo init -m "$MANIFEST"
+    yes | repo init -m custom_manifest.xml
   else
     yes | repo init $REPO_INIT_PARAM -u "$REPO" -b "${TAG_PREFIX}${BRANCH_NAME}"
   fi
