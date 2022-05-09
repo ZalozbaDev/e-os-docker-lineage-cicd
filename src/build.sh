@@ -98,8 +98,13 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   if [ -n ${REPO_INIT_DEPTH} ] && [ ${REPO_INIT_DEPTH} -gt 0 ]; then
     REPO_INIT_PARAM="--depth ${REPO_INIT_DEPTH}"
   fi
-  yes | repo init $REPO_INIT_PARAM -u "$REPO" -b "${TAG_PREFIX}${BRANCH_NAME}"
 
+  if [ -f "$MANIFEST" ]; then
+    echo ">> [$(date)] Using manual manifest:"
+    yes | repo init -m "$MANIFEST"
+  else
+    yes | repo init $REPO_INIT_PARAM -u "$REPO" -b "${TAG_PREFIX}${BRANCH_NAME}"
+  fi
   # Copy local manifests to the appropriate folder in order take them into consideration
   echo ">> [$(date)] Copying '$LMANIFEST_DIR/*.xml' to '.repo/local_manifests/'"
   mkdir -p .repo/local_manifests
