@@ -275,13 +275,13 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
         SKIP_DYNAMIC_IMAGES="odm.img product.img system.img system_ext.img vendor.img"
         if [ "$BACKUP_IMG" = true ]; then
           if [ "$BUILD_SUPER_IMAGE" = true ]; then
-	    find . -maxdepth 1 -name '*.img' -o -name '*_scatter.txt' -o -name '*.bin' -type f $(printf "! -name %s " $(echo "$SKIP_DYNAMIC_IMAGES")) -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+	    find . -maxdepth 1 \( -name '*.img' -o -name '*_scatter.txt' -o -name '*.bin' \) -type f $(printf "! -name %s " $(echo "$SKIP_DYNAMIC_IMAGES")) -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
           elif [ "$SPARSE_PREBUILT_VENDOR_IMAGE" = true ]; then
             echo "Sparsing prebuilt vendor image"
             img2simg vendor.img vendor-sparsed.img || return 1
-            find . -maxdepth 1 -name '*.img' -o -name '*_scatter.txt' -o -name '*.bin' -type f ! -name vendor.img -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+            find . -maxdepth 1 \( -name '*.img' -o -name '*_scatter.txt' -o -name '*.bin' \) -type f ! -name vendor.img -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
           else
-            find . -maxdepth 1 -name '*.img' -o -name '*_scatter.txt' -o -name '*.bin' -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
+            find . -maxdepth 1 \( -name '*.img' -o -name '*_scatter.txt' -o -name '*.bin' \) -type f -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
 	  fi
           cd "$ZIP_DIR/$zipsubdir" || return 1
           sha256sum "IMG-$build" > "IMG-$build.sha256sum"
