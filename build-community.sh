@@ -105,6 +105,10 @@ for branch in ${BRANCH_NAME//,/ }; do
         themuppets_branch="lineage-18.1"
         android_version="11"
         ;;
+      *s*)
+        themuppets_branch="lineage-19.1"
+        android_version="12"
+        ;;
       *)
         echo ">> [$(date)] Building branch $branch is not (yet) suppported"
         exit 1
