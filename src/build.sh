@@ -278,14 +278,6 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
         SKIP_DYNAMIC_IMAGES="odm.img product.img system.img system_ext.img vendor.img"
         if [ "$BACKUP_IMG" = true ]; then
-          if [ "$BUILD_FLASH_PACKAGE" = true ]; then
-            echo "backing up flash tools"
-            git clone https://gitlab.e.foundation/e/os/flash_tools
-            cd flash_tools
-            zip -r "$ZIP_DIR/$zipsubdir/IMG-$build"  bin*
-            zip "$ZIP_DIR/$zipsubdir/IMG-$build"  flash_${DEVICE}_factory.sh
-            cd ..
-          fi
           if [ "$BUILD_SUPER_IMAGE" = true ]; then
 	    find . -maxdepth 1 \( -name '*.img' -o -name '*_scatter.txt' -o -name '*.bin' \) -type f $(printf "! -name %s " $(echo "$SKIP_DYNAMIC_IMAGES")) -exec zip "$ZIP_DIR/$zipsubdir/IMG-$build" {} \;
           elif [ "$SPARSE_PREBUILT_VENDOR_IMAGE" = true ]; then
