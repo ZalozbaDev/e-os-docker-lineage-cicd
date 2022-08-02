@@ -112,6 +112,9 @@ ENV BACKUP_EMULATOR false
 # Use lunch command (by default, it's brunch)
 ENV USE_LUNCH false
 
+# Include flash binaries and script to the resulting img zip
+ENV BUILD_FLASH_PACKAGE false
+
 
 # You can optionally specify a USERSCRIPTS_DIR volume containing these scripts:
 #  * begin.sh, run at the very beginning
