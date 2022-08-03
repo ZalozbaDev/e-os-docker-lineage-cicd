@@ -102,6 +102,11 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   if [ -n ${REPO_INIT_DEPTH} ] && [ ${REPO_INIT_DEPTH} -gt 0 ]; then
     REPO_INIT_PARAM="--depth ${REPO_INIT_DEPTH}"
   fi
+  if [ -f ".repo/manifests/default.xml" ]; then
+    cd .repo/manifests/
+    git checkout default.xml
+    cd ../../
+  fi
   yes | repo init $REPO_INIT_PARAM -u "$REPO" -b "${TAG_PREFIX}${BRANCH_NAME}"
 
   if [ "$REPO_CUSTOM_MANIFEST" != false ]; then
