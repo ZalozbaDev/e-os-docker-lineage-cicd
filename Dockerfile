@@ -115,6 +115,9 @@ ENV USE_LUNCH false
 # Include flash binaries and script to the resulting img zip
 ENV BUILD_FLASH_PACKAGE false
 
+# specify a custom manifest URL
+ENV REPO_CUSTOM_MANIFEST
+
 
 # You can optionally specify a USERSCRIPTS_DIR volume containing these scripts:
 #  * begin.sh, run at the very beginning
