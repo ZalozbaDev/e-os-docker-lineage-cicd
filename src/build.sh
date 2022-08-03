@@ -104,6 +104,10 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
   fi
   yes | repo init $REPO_INIT_PARAM -u "$REPO" -b "${TAG_PREFIX}${BRANCH_NAME}"
 
+  if [ "$REPO_CUSTOM_MANIFEST" != false ]; then
+    wget -O .repo/manifests/default.xml $REPO_CUSTOM_MANIFEST
+  fi
+
   # Copy local manifests to the appropriate folder in order take them into consideration
   echo ">> [$(date)] Copying '$LMANIFEST_DIR/*.xml' to '.repo/local_manifests/'"
   mkdir -p .repo/local_manifests
