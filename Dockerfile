@@ -116,7 +116,7 @@ ENV USE_LUNCH false
 ENV BUILD_FLASH_PACKAGE false
 
 # specify a custom manifest URL
-ENV REPO_CUSTOM_MANIFEST
+ENV REPO_CUSTOM_MANIFEST false
 
 
 # You can optionally specify a USERSCRIPTS_DIR volume containing these scripts:
