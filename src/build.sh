@@ -119,7 +119,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
   echo ">> [$(date)] Syncing branch repository"
   builddate=$(date +%Y%m%d)
-  repo_out=$(repo sync -c --force-sync 2>&1 > /dev/null)
+  repo_out=$(repo sync -c -j$(nproc --all) --force-sync 2>&1 > /dev/null)
   repo_status=$?
   echo -e $repo_out
 
@@ -189,7 +189,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       cd "$SRC_DIR/$branch_dir" || return 1
 
 
-      if ! repo sync -c --force-sync; then
+      if ! repo sync -c -j$(nproc --all) --force-sync; then
         sync_successful=false
         build_device=false
       fi
