@@ -34,7 +34,7 @@ fi
 sync_successful=true
 
 use_openjdk_from_ubuntu=false
-branch_dir=$(sed -E 's/^v[0-9](\.[0-9]*){0,2}(-(beta|alpha|rc)(\.[0-9]*){0,1}){0,1}-(nougat|oreo|pie|q|r)(-[a-zA-Z0-9_]*)*$/\5/' <<< "${BRANCH_NAME}")
+branch_dir=$(sed -E 's/^v[0-9](\.[0-9]*){0,2}(-(beta|alpha|rc)(\.[0-9]*){0,1}){0,1}-(nougat|oreo|pie|q|r|s)(-[a-zA-Z0-9_]*)*$/\5/' <<< "${BRANCH_NAME}")
 branch_dir=${branch_dir^^}
 
 if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
