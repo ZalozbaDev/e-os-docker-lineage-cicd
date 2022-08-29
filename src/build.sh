@@ -34,7 +34,7 @@ fi
 sync_successful=true
 
 use_openjdk_from_ubuntu=false
-branch_dir=$(sed -E 's/^v[0-9](\.[0-9]*){0,2}(-(beta|alpha|rc)(\.[0-9]*){0,1}){0,1}-(nougat|oreo|pie|q|r)(-[a-zA-Z0-9_]*)*$/\5/' <<< "${BRANCH_NAME}")
+branch_dir=$(sed -E 's/^v[0-9](\.[0-9]*){0,2}(-(beta|alpha|rc)(\.[0-9]*){0,1}){0,1}-(nougat|oreo|pie|q|r|s)(-[a-zA-Z0-9_]*)*$/\5/' <<< "${BRANCH_NAME}")
 branch_dir=${branch_dir^^}
 
 if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
@@ -119,7 +119,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
 
   echo ">> [$(date)] Syncing branch repository"
   builddate=$(date +%Y%m%d)
-  repo_out=$(repo sync -c --force-sync 2>&1 > /dev/null)
+  repo_out=$(repo sync -c -j$(nproc --all) --force-sync 2>&1 > /dev/null)
   repo_status=$?
   echo -e $repo_out
 
@@ -189,7 +189,7 @@ if [ -n "${BRANCH_NAME}" ] && [ -n "${DEVICE}" ]; then
       cd "$SRC_DIR/$branch_dir" || return 1
 
 
-      if ! repo sync -c --force-sync; then
+      if ! repo sync -c -j$(nproc --all) --force-sync; then
         sync_successful=false
         build_device=false
       fi

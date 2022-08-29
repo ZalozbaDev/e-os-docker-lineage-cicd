@@ -66,7 +66,7 @@ if [ "$LOCAL_MIRROR" = true ]; then
   fi
 
   echo ">> [$(date)] Syncing mirror repository" | tee -a "$repo_log"
-  repo sync --force-sync --no-clone-bundle &>> "$repo_log"
+  repo sync -j$(nproc --all) --force-sync --no-clone-bundle &>> "$repo_log"
 
   if [ $? != 0 ]; then
     sync_successful=false
@@ -163,7 +163,7 @@ for branch in ${BRANCH_NAME//,/ }; do
 
     echo ">> [$(date)] Syncing branch repository" | tee -a "$repo_log"
     builddate=$(date +%Y%m%d)
-    repo sync -c --force-sync &>> "$repo_log"
+    repo sync -c -j$(nproc --all) --force-sync &>> "$repo_log"
 
     if [ $? != 0 ]; then
       sync_successful=false
@@ -235,7 +235,7 @@ for branch in ${BRANCH_NAME//,/ }; do
           if [ "$LOCAL_MIRROR" = true ]; then
             echo ">> [$(date)] Syncing mirror repository" | tee -a "$repo_log"
             cd "$MIRROR_DIR"
-            repo sync --force-sync --no-clone-bundle &>> "$repo_log"
+            repo sync -j$(nproc --all) --force-sync --no-clone-bundle &>> "$repo_log"
 
             if [ $? != 0 ]; then
               sync_successful=false
