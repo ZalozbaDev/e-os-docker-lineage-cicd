@@ -152,9 +152,9 @@ for branch in ${BRANCH_NAME//,/ }; do
         TAG_PREFIX="refs/tags/"
       fi
 
-      echo ">> [$(date)] repocmd = repo init -u '$REPO' -b' ${TAG_PREFIX}$branch'"
+      echo ">> [$(date)] repocmd = repo init -u '$REPO' -b '${TAG_PREFIX}$branch'"
       
-      yes | repo init -u "$REPO" -b "${TAG_PREFIX}$branch" &>> "$repo_log"
+      yes | repo init -v -u "$REPO" -b "${TAG_PREFIX}$branch" &>> "$repo_log"
     fi
 
     # Copy local manifests to the appropriate folder in order take them into consideration
@@ -171,7 +171,7 @@ for branch in ${BRANCH_NAME//,/ }; do
 
     echo ">> [$(date)] Syncing branch repository" | tee -a "$repo_log"
     builddate=$(date +%Y%m%d)
-    repo sync -c -j$(nproc --all) --force-sync &>> "$repo_log"
+    repo sync -v -c -j$(nproc --all) --force-sync &>> "$repo_log"
 
     if [ $? != 0 ]; then
       sync_successful=false
