@@ -42,6 +42,8 @@ if [ -n "$DEVICE_LIST" ]; then
   read $device_list_first_branch <<< "$DEVICE_LIST,${!device_list_first_branch}"
 fi
 
+echo ">> [$(date)] device_list_first_branch = '$device_list_first_branch'"
+
 sync_successful=true
 
 if [ "$LOCAL_MIRROR" = true ]; then
@@ -81,6 +83,8 @@ for branch in ${BRANCH_NAME//,/ }; do
   device_list_cur_branch="DEVICE_LIST_$branch_dir"
   devices=${!device_list_cur_branch}
 
+  echo ">> [$(date)] branch_dir = '$branch_dir'"
+  
   if [ -n "$branch" ] && [ -n "$devices" ]; then
     vendor=lineage
     case "$branch" in
@@ -117,6 +121,8 @@ for branch in ${BRANCH_NAME//,/ }; do
 
     android_version_major=$(cut -d '.' -f 1 <<< $android_version)
 
+    echo ">> [$(date)] android_version   = '$android_version'"
+    echo ">> [$(date)] themuppets_branch = '$themuppets_branch'"
 
     mkdir -p "$SRC_DIR/$branch_dir"
     cd "$SRC_DIR/$branch_dir"
@@ -146,6 +152,8 @@ for branch in ${BRANCH_NAME//,/ }; do
         TAG_PREFIX="refs/tags/"
       fi
 
+      echo ">> [$(date)] repocmd = repo init -u '$REPO' -b' ${TAG_PREFIX}$branch'"
+      
       yes | repo init -u "$REPO" -b "${TAG_PREFIX}$branch" &>> "$repo_log"
     fi
 
